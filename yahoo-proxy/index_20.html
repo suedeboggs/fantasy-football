@@ -1,0 +1,1557 @@
+<title>Fantasy Command Center</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #F2F4F8;
+  --surface: #FFFFFF;
+  --surface-2: #F7F9FC;
+  --border: #DEE3EE;
+  --primary: #1952C8;
+  --primary-dim: #EEF2FD;
+  --start: #00A36C;
+  --start-bg: #E6F7F1;
+  --sit: #D93025;
+  --sit-bg: #FDECEA;
+  --flex-c: #C07000;
+  --flex-bg: #FEF5E6;
+  --text: #0D1421;
+  --text-2: #4A5470;
+  --text-3: #8892AA;
+  --shadow-sm: 0 1px 2px rgba(13,20,33,.06);
+  --shadow-md: 0 2px 8px rgba(13,20,33,.09),0 1px 3px rgba(13,20,33,.05);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --tab-h: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1117; --surface: #181E2C; --surface-2: #1C2333;
+    --border: #2A3349; --primary: #4D82F0; --primary-dim: #1A2550;
+    --start: #2ECC8A; --start-bg: #0D2E20; --sit: #F1645A; --sit-bg: #2E1212;
+    --flex-c: #F0A830; --flex-bg: #2A1E00; --text: #EEF1F8; --text-2: #8A95B4;
+    --text-3: #505C7A; --shadow-sm: 0 1px 2px rgba(0,0,0,.3); --shadow-md: 0 2px 8px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1117; --surface: #181E2C; --surface-2: #1C2333;
+  --border: #2A3349; --primary: #4D82F0; --primary-dim: #1A2550;
+  --start: #2ECC8A; --start-bg: #0D2E20; --sit: #F1645A; --sit-bg: #2E1212;
+  --flex-c: #F0A830; --flex-bg: #2A1E00; --text: #EEF1F8; --text-2: #8A95B4;
+  --text-3: #505C7A; --shadow-sm: 0 1px 2px rgba(0,0,0,.3); --shadow-md: 0 2px 8px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer}
+a{color:var(--primary)}
+
+/* ── Header ── */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;box-shadow:var(--shadow-sm)}
+.hdr-inner{max-width:1100px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--primary);letter-spacing:.5px;white-space:nowrap}
+.logo span{color:var(--text);opacity:.35}
+.league-pill{background:var(--primary-dim);color:var(--primary);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+.team-name{font-weight:600;font-size:14px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;cursor:pointer;border:none;background:none;padding:4px 8px;border-radius:6px;transition:background .15s}
+.team-name:hover{background:var(--surface-2)}
+.hdr-gap{flex:1}
+.week-badge{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;font-weight:600;color:var(--text-2);white-space:nowrap}
+.refresh-btn{display:flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);padding:7px 14px;font-size:13px;font-weight:600;transition:opacity .15s;white-space:nowrap}
+.refresh-btn:hover{opacity:.88}
+.refresh-btn svg{transition:transform .5s}
+.refresh-btn.spinning svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-updated{font-size:11px;color:var(--text-3);white-space:nowrap}
+
+/* ── Tabs ── */
+.tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:190}
+.tabs-inner{max-width:1100px;margin:0 auto;padding:0 8px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;padding:0 14px;height:var(--tab-h);font-size:13px;font-weight:500;color:var(--text-2);display:flex;align-items:center;gap:6px;transition:color .15s,border-color .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.tab-icon{font-size:15px}
+
+/* ── Layout ── */
+.content{max-width:1100px;margin:0 auto;padding:20px 16px}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:760px){.two-col,.three-col{grid-template-columns:1fr}}
+.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}.mb-8{margin-bottom:8px}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-head{padding:14px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.4px;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-body{padding:12px 16px 14px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
+
+/* ── Status badges ── */
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.4px;white-space:nowrap}
+.badge-start{background:var(--start-bg);color:var(--start)}
+.badge-sit{background:var(--sit-bg);color:var(--sit)}
+.badge-flex{background:var(--flex-bg);color:var(--flex-c)}
+.badge-out{background:var(--sit-bg);color:var(--sit)}
+.badge-q{background:var(--flex-bg);color:var(--flex-c)}
+.badge-p{background:var(--start-bg);color:var(--start)}
+.badge-trending{background:var(--primary-dim);color:var(--primary)}
+
+/* ── Position chips ── */
+.pos{display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:.5px;line-height:1.6}
+.pos-QB{background:#FDE8E8;color:#B91C1C}
+.pos-RB{background:#E8F4E8;color:#15803D}
+.pos-WR{background:#E8F0FE;color:#1D4ED8}
+.pos-TE{background:#FEF3E8;color:#B45309}
+.pos-K{background:#F3E8FE;color:#7C3AED}
+.pos-DEF{background:#F0F0F0;color:#374151}
+.pos-FLEX{background:#E8F0FE;color:#1D4ED8}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pos-QB{background:#2E1212;color:#F87171}
+  :root:not([data-theme="light"]) .pos-RB{background:#0D2E0D;color:#4ADE80}
+  :root:not([data-theme="light"]) .pos-WR{background:#1A2550;color:#93C5FD}
+  :root:not([data-theme="light"]) .pos-TE{background:#2E1E00;color:#FCD34D}
+  :root:not([data-theme="light"]) .pos-K{background:#1E0A2E;color:#C084FC}
+  :root:not([data-theme="light"]) .pos-DEF{background:#1C2333;color:#9CA3AF}
+}
+
+/* ── Player rows ── */
+.player-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.player-row:last-child{border-bottom:none}
+.player-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--surface-2);flex-shrink:0;border:1px solid var(--border)}
+.team-logo-sm{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+.player-info{flex:1;min-width:0}
+.player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;color:var(--text)}
+.player-meta{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px;margin-top:1px;flex-wrap:wrap}
+.proj-block{text-align:right;flex-shrink:0}
+.proj-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.proj-lbl{font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.3px}
+.matchup-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-easy{background:var(--start)}
+.dot-mid{background:var(--flex-c)}
+.dot-hard{background:var(--sit)}
+
+/* ── Lineup grid ── */
+.lineup-slot{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:0;border-bottom:1px solid var(--border)}
+.lineup-slot:last-child{border-bottom:none}
+.slot-pos{padding:10px 12px;font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--text-3);background:var(--surface-2);border-right:1px solid var(--border);align-self:stretch;display:flex;align-items:center}
+.slot-content{padding:8px 12px;display:flex;align-items:center;gap:10px;min-width:0}
+.slot-action{padding:8px 12px;display:flex;align-items:center;gap:8px}
+.slot-empty{color:var(--text-3);font-size:13px;font-style:italic}
+.bench-sep{padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);border-top:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-3);text-transform:uppercase}
+
+/* ── News ── */
+.news-item{padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.news-item:last-child{border-bottom:none}
+.news-item:hover .news-head{color:var(--primary)}
+.news-head{font-weight:600;font-size:13px;line-height:1.45;color:var(--text);margin-bottom:3px;text-wrap:balance;transition:color .15s}
+.news-desc{font-size:12px;color:var(--text-2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.news-meta{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:6px;margin-top:5px}
+.news-bullet{width:3px;height:3px;border-radius:50%;background:var(--border);flex-shrink:0}
+.news-tag{background:var(--primary-dim);color:var(--primary);font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px}
+
+/* ── Waiver table ── */
+.waiver-header{display:grid;grid-template-columns:30px 1fr 70px 70px 80px 90px;gap:8px;padding:6px 12px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--text-3);text-transform:uppercase}
+.waiver-row{display:grid;grid-template-columns:30px 1fr 70px 70px 80px 90px;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s}
+.waiver-row:hover{background:var(--surface-2)}
+.waiver-row:last-child{border-bottom:none}
+.waiver-rank{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text-3);text-align:center}
+.waiver-pts{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);text-align:center;font-variant-numeric:tabular-nums}
+.waiver-own{font-size:12px;color:var(--text-2);text-align:center}
+.waiver-trend{font-size:12px;color:var(--start);font-weight:600;text-align:center}
+.waiver-trend.down{color:var(--sit)}
+.add-btn{background:var(--primary-dim);color:var(--primary);border:1px solid #C8D8F8;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;transition:all .15s}
+.add-btn:hover{background:var(--primary);color:#fff}
+@media(max-width:600px){
+  .waiver-header,.waiver-row{grid-template-columns:30px 1fr 60px 70px}
+  .waiver-header span:nth-child(4),.waiver-row span:nth-child(4),
+  .waiver-header span:nth-child(5),.waiver-row span:nth-child(5){display:none}
+}
+
+/* ── Sub-tabs ── */
+.sub-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.sub-tab{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--text-2);transition:all .15s}
+.sub-tab:hover{border-color:var(--primary);color:var(--primary)}
+.sub-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── Alert ── */
+.alert{padding:12px 14px;border-radius:var(--r-sm);font-size:13px;line-height:1.5;margin-bottom:14px}
+.alert-info{background:var(--primary-dim);border:1px solid #C8D8F8;color:var(--primary)}
+.alert-warn{background:var(--flex-bg);border:1px solid #F5D88A;color:var(--flex-c)}
+.alert strong{font-weight:700}
+
+/* ── Schedule ── */
+.game-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.game-teams{flex:1;display:flex;align-items:center;gap:8px;min-width:0}
+.game-score{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;min-width:60px;text-align:center}
+.game-time{font-size:12px;color:var(--text-3);white-space:nowrap}
+.game-status{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+.status-live{background:#FDECEA;color:var(--sit)}
+.status-final{background:var(--surface-2);color:var(--text-3);border:1px solid var(--border)}
+.status-pre{background:var(--primary-dim);color:var(--primary)}
+
+/* ── Trade ── */
+.trade-suggestion{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px}
+.trade-row{display:flex;align-items:center;gap:12px;margin:6px 0}
+.trade-side{flex:1;min-width:0}
+.trade-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px}
+.trade-arrow{color:var(--text-3);font-size:20px;flex-shrink:0}
+.trade-reasoning{font-size:12px;color:var(--text-2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5}
+.trade-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.trade-buy{background:var(--start-bg);color:var(--start)}
+.trade-sell{background:var(--sit-bg);color:var(--sit)}
+.trade-balanced{background:var(--primary-dim);color:var(--primary)}
+
+/* ── Setup ── */
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.form-input{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;font-family:inherit}
+.form-input:focus{border-color:var(--primary)}
+.form-select{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;color:var(--text);background:var(--surface);outline:none;font-family:inherit}
+.btn{padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:600;border:none;transition:all .15s;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{opacity:.88}
+.btn-secondary{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}.btn-secondary:hover{background:var(--primary-dim)}
+.save-confirm{color:var(--start);font-size:12px;font-weight:600;display:none;margin-left:10px}
+
+/* ── Loading ── */
+.loading-row{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--text-3)}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* ── Trend bars ── */
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:28px;margin-top:4px}
+.spark-bar{flex:1;background:var(--primary);border-radius:2px 2px 0 0;min-height:3px;opacity:.7;transition:opacity .15s}
+.spark-bar:hover{opacity:1}
+
+/* ── Insight chips ── */
+.insights{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.insight{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface)}
+.insight.good{border-color:#A7D9BE;background:var(--start-bg);color:var(--start)}
+.insight.bad{border-color:#F5B5B0;background:var(--sit-bg);color:var(--sit)}
+.insight.neutral{border-color:#F5D88A;background:var(--flex-bg);color:var(--flex-c)}
+
+/* ── Misc ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-3)}
+.empty-state .icon{font-size:36px;margin-bottom:10px}
+.empty-state p{font-size:14px;max-width:260px;margin:0 auto}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.link-btn{background:none;border:none;color:var(--primary);font-size:13px;font-weight:600;padding:0;text-decoration:underline;text-underline-offset:2px}
+.two-col-setup{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.two-col-setup{grid-template-columns:1fr}}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--text)}
+.schedule-strength{display:flex;gap:6px;align-items:center;margin-top:4px}
+.strength-bar{height:6px;border-radius:3px}
+.schedule-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.schedule-row:last-child{border-bottom:none}
+</style>
+
+<div id="app">
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">FANTASY <span>FC</span></div>
+    <div class="league-pill">Yahoo #248304</div>
+    <button class="team-name" id="teamNameBtn" title="Click to rename">My Team</button>
+    <div class="hdr-gap"></div>
+    <div class="week-badge" id="weekBadge">NFL Week —</div>
+    <button id="yahooAuthBtn" onclick="connectYahoo()" style="background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);padding:7px 14px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;transition:all .15s;flex-shrink:0">🔗 Connect Yahoo</button>
+    <div class="last-updated" id="lastUpdated"></div>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs-bar">
+  <div class="tabs-inner">
+    <button class="tab-btn active" data-tab="lineup"><span class="tab-icon">📋</span> My Lineup</button>
+    <button class="tab-btn" data-tab="waiver"><span class="tab-icon">➕</span> Waiver Wire</button>
+    <button class="tab-btn" data-tab="news"><span class="tab-icon">📰</span> News & Injuries</button>
+    <button class="tab-btn" data-tab="trades"><span class="tab-icon">🔄</span> Trade Center</button>
+    <button class="tab-btn" data-tab="schedule"><span class="tab-icon">📅</span> Schedule</button>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+<!-- ══ LINEUP TAB ══ -->
+<div class="tab-pane active" id="tab-lineup">
+  <div class="two-col">
+    <!-- Lineup card -->
+    <div style="grid-column:1/-1">
+      <div class="insights" id="insightsRow">
+        <div class="insight neutral">🔗 Connect Yahoo Fantasy to sync your real roster and unlock personalized advice</div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-head" style="padding-bottom:12px">
+        <div class="card-title">🏆 Starting Lineup</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;color:var(--text-3)" id="projTotal"></span>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:12px" onclick="isConnected() ? fetchYahooData() : connectYahoo()">Sync Roster</button>
+        </div>
+      </div>
+      <div id="lineupGrid"></div>
+    </div>
+  </div>
+
+  <div style="height:16px"></div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head"><div class="card-title">🎯 Start/Sit Advice</div></div>
+      <div class="card-body" id="startSitAdvice">
+        <div class="empty-state"><div class="icon">📋</div><p>Add your roster in Setup to get personalized start/sit recommendations.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 Weekly Trends</div></div>
+      <div class="card-body" id="weeklyTrends">
+        <div class="loading-row"><div class="spinner"></div> Loading trends...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WAIVER TAB ══ -->
+<div class="tab-pane" id="tab-waiver">
+  <div class="alert alert-info mb-16">
+    <strong>Waiver Wire Intelligence</strong> — Rankings reflect consensus fantasy value. Players marked 🔥 are trending adds based on recent news and usage patterns.
+  </div>
+  <div class="sub-tabs" id="waiverSubTabs">
+    <button class="sub-tab active" data-pos="ALL">All</button>
+    <button class="sub-tab" data-pos="QB">QB</button>
+    <button class="sub-tab" data-pos="RB">RB</button>
+    <button class="sub-tab" data-pos="WR">WR</button>
+    <button class="sub-tab" data-pos="TE">TE</button>
+    <button class="sub-tab" data-pos="K">K</button>
+    <button class="sub-tab" data-pos="DEF">DEF</button>
+  </div>
+  <div class="card">
+    <div class="waiver-header">
+      <span>#</span><span>Player</span><span style="text-align:center">Proj Pts</span>
+      <span style="text-align:center">% Own</span><span style="text-align:center">Trend</span><span style="text-align:center">Action</span>
+    </div>
+    <div id="waiverList"></div>
+  </div>
+</div>
+
+<!-- ══ NEWS TAB ══ -->
+<div class="tab-pane" id="tab-news">
+  <div class="sub-tabs" id="newsSubTabs">
+    <button class="sub-tab active" data-filter="all">All News</button>
+    <button class="sub-tab" data-filter="injuries">🤕 Injuries</button>
+    <button class="sub-tab" data-filter="myteam">⭐ My Players</button>
+  </div>
+  <div class="two-col">
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-head"><div class="card-title">📰 NFL News Feed <span style="font-size:12px;font-weight:400;color:var(--text-3);margin-left:4px">via ESPN</span></div></div>
+      <div class="card-body" id="newsFeed">
+        <div class="loading-row"><div class="spinner"></div> Fetching latest news...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🤕 Injury Report</div></div>
+      <div class="card-body" id="injuryReport">
+        <div class="loading-row"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚡ Quick Hits</div></div>
+      <div class="card-body" id="quickHits">
+        <div class="loading-row"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRADES TAB ══ -->
+<div class="tab-pane" id="tab-trades">
+  <div class="alert alert-info mb-16">
+    <strong>Trade Center</strong> — Suggestions based on roster construction, positional scarcity, and rest-of-season value. Add your roster in Setup for personalized targets.
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="section-label">🔥 Sell High Candidates</div>
+      <div id="sellHighList"></div>
+    </div>
+    <div>
+      <div class="section-label">📉 Buy Low Targets</div>
+      <div id="buyLowList"></div>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="section-label mb-16">💡 Suggested Trades</div>
+  <div id="tradesList"></div>
+</div>
+
+<!-- ══ SCHEDULE TAB ══ -->
+<div class="tab-pane" id="tab-schedule">
+  <div class="two-col">
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-head"><div class="card-title">🏈 This Week's Games <span style="font-size:12px;font-weight:400;color:var(--text-3);margin-left:4px">Live via ESPN</span></div></div>
+      <div class="card-body" id="scoreboardGrid">
+        <div class="loading-row"><div class="spinner"></div> Loading scoreboard...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">📆 Upcoming Bye Weeks</div></div>
+      <div class="card-body" id="byeWeeks">
+        <div class="loading-row"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🎯 Fantasy Playoff Weeks</div></div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:10px">Target players with favorable <strong>Weeks 14–17</strong> schedules — most leagues run fantasy playoffs during these weeks.</p>
+        <div id="playoffSchedule"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- yahoo and setup tabs removed — Yahoo data flows via OAuth -->
+
+
+</main>
+</div><!-- #app -->
+
+<script>
+// ═══════════════════════════════════
+// DATA
+// ═══════════════════════════════════
+
+const NFL_TEAMS = {
+  ARI:{name:'Arizona Cardinals',city:'Arizona',abbr:'ARI'},ATL:{name:'Atlanta Falcons',city:'Atlanta',abbr:'ATL'},
+  BAL:{name:'Baltimore Ravens',city:'Baltimore',abbr:'BAL'},BUF:{name:'Buffalo Bills',city:'Buffalo',abbr:'BUF'},
+  CAR:{name:'Carolina Panthers',city:'Carolina',abbr:'CAR'},CHI:{name:'Chicago Bears',city:'Chicago',abbr:'CHI'},
+  CIN:{name:'Cincinnati Bengals',city:'Cincinnati',abbr:'CIN'},CLE:{name:'Cleveland Browns',city:'Cleveland',abbr:'CLE'},
+  DAL:{name:'Dallas Cowboys',city:'Dallas',abbr:'DAL'},DEN:{name:'Denver Broncos',city:'Denver',abbr:'DEN'},
+  DET:{name:'Detroit Lions',city:'Detroit',abbr:'DET'},GB:{name:'Green Bay Packers',city:'Green Bay',abbr:'GB'},
+  HOU:{name:'Houston Texans',city:'Houston',abbr:'HOU'},IND:{name:'Indianapolis Colts',city:'Indianapolis',abbr:'IND'},
+  JAX:{name:'Jacksonville Jaguars',city:'Jacksonville',abbr:'JAX'},KC:{name:'Kansas City Chiefs',city:'Kansas City',abbr:'KC'},
+  LAC:{name:'LA Chargers',city:'LA',abbr:'LAC'},LAR:{name:'LA Rams',city:'LA',abbr:'LAR'},
+  LV:{name:'Las Vegas Raiders',city:'Las Vegas',abbr:'LV'},MIA:{name:'Miami Dolphins',city:'Miami',abbr:'MIA'},
+  MIN:{name:'Minnesota Vikings',city:'Minnesota',abbr:'MIN'},NE:{name:'New England Patriots',city:'New England',abbr:'NE'},
+  NO:{name:'New Orleans Saints',city:'New Orleans',abbr:'NO'},NYG:{name:'NY Giants',city:'NY',abbr:'NYG'},
+  NYJ:{name:'NY Jets',city:'NY',abbr:'NYJ'},PHI:{name:'Philadelphia Eagles',city:'Philadelphia',abbr:'PHI'},
+  PIT:{name:'Pittsburgh Steelers',city:'Pittsburgh',abbr:'PIT'},SEA:{name:'Seattle Seahawks',city:'Seattle',abbr:'SEA'},
+  SF:{name:'San Francisco 49ers',city:'San Francisco',abbr:'SF'},TB:{name:'Tampa Bay Buccaneers',city:'Tampa Bay',abbr:'TB'},
+  TEN:{name:'Tennessee Titans',city:'Tennessee',abbr:'TEN'},WSH:{name:'Washington Commanders',city:'Washington',abbr:'WSH'}
+};
+
+// Defensive rankings by position — 1=best D (worst for fantasy), 32=worst D (best for fantasy)
+// Updated pre-2026 estimates
+const DEF_RANKS = {
+  QB: {SF:3,BAL:5,PHI:6,MIN:7,DEN:8,NE:9,PIT:10,IND:11,NYJ:12,BUF:13,CHI:14,HOU:15,LAC:16,CLE:17,ATL:18,DET:19,GB:20,KC:21,DAL:22,LAR:23,LV:24,TEN:25,NO:26,MIA:27,WSH:28,CAR:29,ARI:30,TB:31,SEA:32,NYG:2,JAX:4,CIN:1},
+  RB: {PHI:1,BAL:2,SF:3,TEN:4,MIN:5,PIT:6,NE:7,BUF:8,DEN:9,HOU:10,DET:11,IND:12,KC:13,LAC:14,SEA:15,MIA:16,ATL:17,NYJ:18,CIN:19,LV:20,NO:21,DAL:22,CLE:23,LAR:24,JAX:25,TB:26,WSH:27,NYG:28,GB:29,CHI:30,ARI:31,CAR:32},
+  WR: {MIA:1,JAX:2,NYJ:3,PHI:4,BAL:5,SF:6,MIN:7,BUF:8,CHI:9,DEN:10,PIT:11,NE:12,HOU:13,GB:14,ATL:15,DET:16,KC:17,TEN:18,LAC:19,IND:20,SEA:21,CLE:22,CIN:23,LV:24,LAR:25,NO:26,DAL:27,NYG:28,WSH:29,CAR:30,ARI:31,TB:32},
+  TE: {DAL:1,SF:2,BAL:3,BUF:4,PHI:5,MIN:6,NE:7,TEN:8,CHI:9,DEN:10,PIT:11,KC:12,HOU:13,ATL:14,DET:15,CIN:16,NYJ:17,MIA:18,IND:19,LAC:20,GB:21,SEA:22,ARI:23,LV:24,NO:25,LAR:26,NYG:27,WSH:28,CLE:29,CAR:30,JAX:31,TB:32}
+};
+
+// Top 60 fantasy players for waiver/trade recommendations
+const PLAYER_DB = [
+  {name:'Josh Allen',pos:'QB',team:'BUF',proj:27.5,own:99,bye:7,trend:2,espnId:3918298},
+  {name:'Lamar Jackson',pos:'QB',team:'BAL',proj:26.8,own:99,bye:14,trend:1,espnId:3054211},
+  {name:'Jalen Hurts',pos:'QB',team:'PHI',proj:24.2,own:98,bye:5,trend:0,espnId:4040715},
+  {name:'Patrick Mahomes',pos:'QB',team:'KC',proj:22.8,own:99,bye:10,trend:0,espnId:3139477},
+  {name:'C.J. Stroud',pos:'QB',team:'HOU',proj:21.5,own:95,bye:12,trend:1,espnId:4426348},
+  {name:'Jordan Love',pos:'QB',team:'GB',proj:20.8,own:90,bye:6,trend:2,espnId:3916148},
+  {name:'Brock Purdy',pos:'QB',team:'SF',proj:20.2,own:88,bye:9,trend:0,espnId:4697723},
+  {name:'Dak Prescott',pos:'QB',team:'DAL',proj:19.5,own:85,bye:7,trend:-1,espnId:2577417},
+  {name:'Sam Darnold',pos:'QB',team:'MIN',proj:18.8,own:70,bye:6,trend:1,espnId:3912547},
+  {name:'Anthony Richardson',pos:'QB',team:'IND',proj:22.0,own:80,bye:14,trend:3,espnId:4567048},
+  {name:'Christian McCaffrey',pos:'RB',team:'SF',proj:22.0,own:99,bye:9,trend:0,espnId:3054211},
+  {name:'Bijan Robinson',pos:'RB',team:'ATL',proj:19.5,own:98,bye:12,trend:2,espnId:4429795},
+  {name:'Jahmyr Gibbs',pos:'RB',team:'DET',proj:19.2,own:97,bye:5,trend:4,espnId:4684231},
+  {name:'Saquon Barkley',pos:'RB',team:'PHI',proj:18.8,own:99,bye:5,trend:1,espnId:3054211},
+  {name:"De'Von Achane",pos:'RB',team:'MIA',proj:18.2,own:96,bye:10,trend:1,espnId:4429205},
+  {name:'Breece Hall',pos:'RB',team:'NYJ',proj:16.5,own:94,bye:12,trend:-1,espnId:4372016},
+  {name:'Kyren Williams',pos:'RB',team:'LAR',proj:16.0,own:90,bye:6,trend:1,espnId:4569618},
+  {name:'Josh Jacobs',pos:'RB',team:'GB',proj:15.5,own:88,bye:6,trend:0,espnId:4035004},
+  {name:'James Cook',pos:'RB',team:'BUF',proj:15.8,own:87,bye:7,trend:2,espnId:4685736},
+  {name:'Tony Pollard',pos:'RB',team:'TEN',proj:13.8,own:75,bye:12,trend:-1,espnId:4035677},
+  {name:'David Montgomery',pos:'RB',team:'DET',proj:13.5,own:78,bye:5,trend:-2,espnId:3929630},
+  {name:'Aaron Jones',pos:'RB',team:'MIN',proj:13.2,own:72,bye:6,trend:0,espnId:3054211},
+  {name:'CeeDee Lamb',pos:'WR',team:'DAL',proj:21.0,own:99,bye:7,trend:0,espnId:4241389},
+  {name:'Ja\'Marr Chase',pos:'WR',team:'CIN',proj:20.5,own:99,bye:12,trend:1,espnId:4361307},
+  {name:'Justin Jefferson',pos:'WR',team:'MIN',proj:19.8,own:99,bye:6,trend:0,espnId:4262921},
+  {name:'Tyreek Hill',pos:'WR',team:'MIA',proj:18.5,own:99,bye:10,trend:-1,espnId:2576980},
+  {name:'Amon-Ra St. Brown',pos:'WR',team:'DET',proj:17.8,own:97,bye:5,trend:1,espnId:4360310},
+  {name:'Davante Adams',pos:'WR',team:'LV',proj:15.5,own:88,bye:10,trend:0,espnId:2976212},
+  {name:'DJ Moore',pos:'WR',team:'CHI',proj:15.2,own:85,bye:7,trend:1,espnId:3054211},
+  {name:'Puka Nacua',pos:'WR',team:'LAR',proj:15.0,own:82,bye:6,trend:2,espnId:4569613},
+  {name:'Tee Higgins',pos:'WR',team:'CIN',proj:14.8,own:83,bye:12,trend:0,espnId:4262927},
+  {name:'Stefon Diggs',pos:'WR',team:'HOU',proj:14.5,own:80,bye:12,trend:-2,espnId:2576569},
+  {name:'Chris Olave',pos:'WR',team:'NO',proj:14.2,own:78,bye:11,trend:0,espnId:4429814},
+  {name:'Drake London',pos:'WR',team:'ATL',proj:14.0,own:76,bye:12,trend:1,espnId:4428345},
+  {name:'Travis Kelce',pos:'TE',team:'KC',proj:14.5,own:99,bye:10,trend:-1,espnId:2576336},
+  {name:'Mark Andrews',pos:'TE',team:'BAL',proj:13.8,own:97,bye:14,trend:0,espnId:3054211},
+  {name:'Sam LaPorta',pos:'TE',team:'DET',proj:13.2,own:92,bye:5,trend:1,espnId:4429783},
+  {name:'Dallas Goedert',pos:'TE',team:'PHI',proj:12.8,own:89,bye:5,trend:0,espnId:3054211},
+  {name:'T.J. Hockenson',pos:'TE',team:'MIN',proj:12.0,own:82,bye:6,trend:0,espnId:4047618},
+  {name:'Evan Engram',pos:'TE',team:'JAX',proj:11.5,own:78,bye:11,trend:-1,espnId:2979843},
+  {name:'Dalton Kincaid',pos:'TE',team:'BUF',proj:11.0,own:70,bye:7,trend:0,espnId:4430807},
+  {name:'Jake Ferguson',pos:'TE',team:'DAL',proj:11.0,own:72,bye:7,trend:1,espnId:4431611},
+  {name:'Hayden Hurst',pos:'TE',team:'CAR',proj:9.5,own:45,bye:11,trend:2,espnId:3054211},
+  {name:'Harrison Butker',pos:'K',team:'KC',proj:9.2,own:75,bye:10,trend:0,espnId:3054211},
+  {name:'Evan McPherson',pos:'K',team:'CIN',proj:8.8,own:65,bye:12,trend:0,espnId:4362467},
+  {name:'Jake Elliott',pos:'K',team:'PHI',proj:8.6,own:60,bye:5,trend:0,espnId:3054211},
+  {name:'San Francisco 49ers',pos:'DEF',team:'SF',proj:10.5,own:72,bye:9,trend:0,espnId:0},
+  {name:'Dallas Cowboys',pos:'DEF',team:'DAL',proj:9.8,own:68,bye:7,trend:-1,espnId:0},
+  {name:'Philadelphia Eagles',pos:'DEF',team:'PHI',proj:9.5,own:65,bye:5,trend:1,espnId:0},
+  {name:'Baltimore Ravens',pos:'DEF',team:'BAL',proj:9.2,own:60,bye:14,trend:0,espnId:0},
+  {name:'Pittsburgh Steelers',pos:'DEF',team:'PIT',proj:8.8,own:55,bye:9,trend:0,espnId:0},
+];
+
+const LINEUP_SLOTS = [
+  {key:'QB',label:'QB'},
+  {key:'RB1',label:'RB'},
+  {key:'RB2',label:'RB'},
+  {key:'WR1',label:'WR'},
+  {key:'WR2',label:'WR'},
+  {key:'WR3',label:'WR'},
+  {key:'TE',label:'TE'},
+  {key:'FLEX',label:'FLX'},
+  {key:'K',label:'K'},
+  {key:'DEF',label:'DEF'},
+];
+
+const SELL_HIGH = [
+  {name:'Travis Kelce',pos:'TE',team:'KC',reason:'Age concerns; regression candidate. High trade value from name recognition.'},
+  {name:'Tyreek Hill',pos:'WR',team:'MIA',reason:'Aging; target share declining with new offense. Buy low on younger WR.'},
+  {name:'Tony Pollard',pos:'RB',team:'TEN',reason:'Poor offensive line; limited TD opportunities in Tennessee.'},
+  {name:'Stefon Diggs',pos:'WR',team:'HOU',reason:'Injury history; limited role behind other weapons in Houston.'},
+];
+
+const BUY_LOW = [
+  {name:'Anthony Richardson',pos:'QB',team:'IND',reason:'Dual-threat upside is massive — injury-prone but elite when healthy. Buy the dip.'},
+  {name:'Puka Nacua',pos:'WR',team:'LAR',reason:'Slow start to season typical; target volume will normalize. Stafford trusts him.'},
+  {name:"James Cook",pos:'RB',team:'BUF',reason:'Josh Allen carrying early load; Cook will reassert himself in run-heavy weeks.'},
+  {name:'Evan Engram',pos:'TE',team:'JAX',reason:'Down year but still a starter\'s talent. Trevor Lawrence usage will spike.'},
+];
+
+const TRADE_SUGGESTIONS = [
+  {
+    type:'balanced',
+    give:['CeeDee Lamb'],
+    get:['Bijan Robinson','Sam LaPorta'],
+    label:'VALUE TRADE',
+    reasoning:'If you\'re stacked at WR, swap Lamb\'s elite WR value for a premier RB + a stable TE. Net neutral in points, but fixes roster construction.'
+  },
+  {
+    type:'buy',
+    give:['1 mid-tier WR'],
+    get:['Jahmyr Gibbs'],
+    label:'BUY WINDOW',
+    reasoning:'Gibbs is ascending after Pacheco\'s IR designation. Buy before the rest of the league catches on — target cost is one WR2.'
+  },
+  {
+    type:'sell',
+    give:['Travis Kelce'],
+    get:['1 WR2 + 1 RB2'],
+    label:'SELL HIGH',
+    reasoning:'Kelce\'s brand commands premium trade value. Convert into positional depth — TE is deep in 2026 beyond the top 3.'
+  },
+];
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+const state = {
+  roster: null,
+  news: [],
+  scoreboard: null,
+  teamInfo: {},
+  loading: false,
+  newsFilter: 'all',
+  waiverPos: 'ALL',
+  teamName: 'My Team',
+  scoring: 'half',
+  // Yahoo live data
+  importedFreeAgents: [],
+  importedOpponent: null,
+  importedStandings: [],
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('ffcc_state');
+    if (saved) {
+      const s = JSON.parse(saved);
+      state.roster = s.roster || null;
+      state.teamName = s.teamName || 'My Team';
+      state.scoring = s.scoring || 'half';
+      state.importedFreeAgents = s.importedFreeAgents || [];
+      state.importedOpponent = s.importedOpponent || null;
+      state.importedStandings = s.importedStandings || [];
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('ffcc_state', JSON.stringify({
+      roster: state.roster,
+      teamName: state.teamName,
+      scoring: state.scoring,
+      importedFreeAgents: state.importedFreeAgents,
+      importedOpponent: state.importedOpponent,
+      importedStandings: state.importedStandings,
+    }));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════
+// ESPN API
+// ═══════════════════════════════════
+async function fetchNews() {
+  const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=25');
+  const d = await r.json();
+  return (d.articles || []).map(a => ({
+    headline: a.headline,
+    description: a.description || '',
+    published: a.published,
+    link: a.links?.web?.href || '#',
+    images: a.images?.[0]?.url || null,
+    keywords: (a.keywords || []).map(k=>k.toLowerCase()),
+  }));
+}
+
+async function fetchScoreboard() {
+  const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+  return await r.json();
+}
+
+async function fetchESPNTeams() {
+  const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams?limit=50');
+  const d = await r.json();
+  const map = {};
+  const teams = d.sports?.[0]?.leagues?.[0]?.teams || [];
+  teams.forEach(({team}) => {
+    if(team) map[team.abbreviation] = team;
+  });
+  return map;
+}
+
+// ═══════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════
+function teamLogo(abbr, size=22) {
+  return `<img src="https://a.espncdn.com/i/teamlogos/nfl/500/${abbr}.png" width="${size}" height="${size}" alt="${abbr}" style="object-fit:contain" onerror="this.style.display='none'">`;
+}
+
+function playerAvatar(espnId, name) {
+  if(!espnId) return `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-3)">🏈</div>`;
+  return `<img class="player-avatar" src="https://a.espncdn.com/i/headshots/nfl/players/full/${espnId}.png" alt="${name}" onerror="this.src='';this.style.background='var(--surface-2)';this.innerHTML='🏈'">`;
+}
+
+function matchupDot(rank) {
+  if(!rank) return '';
+  let cls = rank >= 24 ? 'dot-easy' : rank >= 14 ? 'dot-mid' : 'dot-hard';
+  let label = rank >= 24 ? 'Favorable' : rank >= 14 ? 'Neutral' : 'Tough';
+  return `<span class="matchup-dot ${cls}" title="vs. opponent ranked #${rank} vs ${label}"></span><span>${label} (#${rank})</span>`;
+}
+
+function timeAgo(iso) {
+  if(!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 60000;
+  if(diff < 60) return `${Math.round(diff)}m ago`;
+  if(diff < 1440) return `${Math.round(diff/60)}h ago`;
+  return `${Math.round(diff/1440)}d ago`;
+}
+
+function posChip(pos) {
+  return `<span class="pos pos-${pos}">${pos}</span>`;
+}
+
+function sparkHTML(values) {
+  const max = Math.max(...values, 1);
+  return `<div class="sparkline">${values.map(v=>`<div class="spark-bar" style="height:${Math.max(4,Math.round(v/max*28))}px" title="${v} pts"></div>`).join('')}</div>`;
+}
+
+// ═══════════════════════════════════
+// LINEUP
+// ═══════════════════════════════════
+function renderLineup() {
+  const grid = document.getElementById('lineupGrid');
+  if(!state.roster || !state.roster.starters) {
+    grid.innerHTML = `<div style="padding:20px 16px">
+      <div class="empty-state"><div class="icon">🔗</div><p>Connect your Yahoo Fantasy account to sync your real roster and get personalized advice.</p><br>
+      <button class="btn btn-primary" onclick="connectYahoo()">Connect Yahoo →</button></div></div>`;
+    return;
+  }
+  const starters = state.roster.starters;
+  let html = '';
+  let totalProj = 0;
+  LINEUP_SLOTS.forEach(slot => {
+    const player = starters[slot.key];
+    if(!player) {
+      html += `<div class="lineup-slot"><div class="slot-pos">${slot.label}</div>
+        <div class="slot-content"><span class="slot-empty">Empty — add in Setup</span></div>
+        <div class="slot-action"></div></div>`;
+      return;
+    }
+    const pData = findPlayer(player.name, player.pos);
+    const proj = pData ? pData.proj : '—';
+    if(pData) totalProj += pData.proj;
+    const pos = player.pos || slot.label;
+    const defPos = ['QB','RB1','RB2','WR1','WR2','WR3','FLEX'].includes(slot.key) ? slot.key.replace(/\d/,'') : pos;
+    const opp = player.opp || '';
+    const defRank = opp && DEF_RANKS[defPos]?.[opp];
+    const rec = getStartRec(proj, defRank);
+    html += `<div class="lineup-slot">
+      <div class="slot-pos">${slot.label}</div>
+      <div class="slot-content">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          ${teamLogo(player.team || '', 22)}
+          <div class="player-info">
+            <div class="player-name">${player.name}</div>
+            <div class="player-meta">${posChip(pos)} ${opp ? `vs ${opp} ${matchupDot(defRank)}` : '<span style="color:var(--text-3)">Set opponent in Setup</span>'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="slot-action">
+        <div class="proj-block" style="margin-right:8px"><div class="proj-num">${typeof proj==='number' ? proj.toFixed(1) : proj}</div><div class="proj-lbl">proj pts</div></div>
+        ${rec ? `<span class="badge badge-${rec.toLowerCase()}">${rec}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  // bench
+  html += `<div class="bench-sep">BENCH</div>`;
+  const bench = state.roster.bench || [];
+  if(bench.length === 0) html += `<div style="padding:12px 16px;color:var(--text-3);font-size:13px">No bench players set. Add them in Setup.</div>`;
+  bench.forEach(player => {
+    if(!player || !player.name) return;
+    const pData = findPlayer(player.name, player.pos);
+    const proj = pData ? pData.proj : '—';
+    const pos = player.pos || 'RB';
+    html += `<div class="lineup-slot">
+      <div class="slot-pos" style="color:var(--text-3)">BN</div>
+      <div class="slot-content">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          ${teamLogo(player.team||'',22)}
+          <div class="player-info">
+            <div class="player-name" style="color:var(--text-2)">${player.name}</div>
+            <div class="player-meta">${posChip(pos)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="slot-action">
+        <div class="proj-block"><div class="proj-num" style="color:var(--text-2)">${typeof proj==='number' ? proj.toFixed(1) : proj}</div><div class="proj-lbl">proj pts</div></div>
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML = html;
+  document.getElementById('projTotal').textContent = totalProj > 0 ? `Projected: ${totalProj.toFixed(1)} pts` : '';
+  renderInsights();
+  renderStartSitAdvice();
+}
+
+function findPlayer(name, pos) {
+  if(!name) return null;
+  const n = name.toLowerCase().trim();
+  return PLAYER_DB.find(p => p.name.toLowerCase().includes(n) || n.includes(p.name.toLowerCase().split(' ').pop()));
+}
+
+function getStartRec(proj, defRank) {
+  if(typeof proj !== 'number') return null;
+  if(!defRank) return proj >= 16 ? 'START' : proj >= 10 ? 'FLEX' : 'SIT';
+  if(defRank >= 22 && proj >= 14) return 'START';
+  if(defRank <= 8 && proj < 14) return 'SIT';
+  if(proj >= 18) return 'START';
+  if(proj < 9) return 'SIT';
+  return 'FLEX';
+}
+
+function renderInsights() {
+  const row = document.getElementById('insightsRow');
+  if(!state.roster?.starters) return;
+  const insights = [];
+  const starters = state.roster.starters;
+  // Check bye weeks
+  Object.values(starters).forEach(p => {
+    if(!p) return;
+    const pd = findPlayer(p.name, p.pos);
+    if(pd && pd.bye && pd.bye <= 4) insights.push({type:'bad', text:`${p.name} has an upcoming bye (Wk ${pd.bye})`});
+  });
+  if(insights.length === 0) insights.push({type:'good',text:'✓ No immediate bye concerns in your lineup'});
+  const totalProj = Object.values(starters).reduce((acc,p) => {
+    if(!p) return acc;
+    const pd = findPlayer(p.name,p.pos);
+    return acc + (pd ? pd.proj : 0);
+  }, 0);
+  if(totalProj > 100) insights.push({type:'good',text:`Strong lineup — ${totalProj.toFixed(0)} pts projected`});
+  else if(totalProj > 0) insights.push({type:'neutral',text:`${totalProj.toFixed(0)} pts projected this week`});
+  row.innerHTML = insights.map(i=>`<div class="insight ${i.type}">${i.text}</div>`).join('');
+}
+
+function renderStartSitAdvice() {
+  const el = document.getElementById('startSitAdvice');
+  if(!state.roster?.starters) return;
+  const advice = [];
+  const starters = state.roster.starters;
+  Object.entries(starters).forEach(([slot,p]) => {
+    if(!p) return;
+    const pd = findPlayer(p.name, p.pos);
+    if(!pd) return;
+    const pos = slot.replace(/\d/,'');
+    const defRank = p.opp && DEF_RANKS[pos]?.[p.opp];
+    const rec = getStartRec(pd.proj, defRank);
+    if(rec === 'START' && defRank >= 24) advice.push({type:'start',text:`<strong>${p.name}</strong> — Excellent matchup vs. ${p.opp || 'opponent'} (ranked #${defRank} vs ${pos}). Lock him in.`});
+    if(rec === 'SIT' && defRank && defRank <= 8) advice.push({type:'sit',text:`<strong>${p.name}</strong> — Tough draw vs. ${p.opp || 'opponent'} (#${defRank} vs ${pos}). Consider benching.`});
+  });
+  if(advice.length === 0) {
+    el.innerHTML = `<p style="font-size:13px;color:var(--text-2)">Set your opponent matchups in Setup → each player slot to get personalized start/sit advice.</p>`;
+    return;
+  }
+  el.innerHTML = advice.map(a => `<div class="alert alert-${a.type==='start'?'info':'warn'}" style="margin-bottom:8px">
+    ${a.type==='start'?'✅':'⚠️'} ${a.text}</div>`).join('');
+}
+
+// ═══════════════════════════════════
+// WAIVER WIRE
+// ═══════════════════════════════════
+function renderWaiver(pos='ALL') {
+  state.waiverPos = pos;
+  const ownedNames = getOwnedNames();
+  const el = document.getElementById('waiverList');
+
+  // If we have Yahoo-imported free agents, use them as the primary source
+  if(state.importedFreeAgents.length > 0) {
+    const yahooAvail = state.importedFreeAgents.filter(p => {
+      if(ownedNames.has(p.name.toLowerCase())) return false;
+      if(pos === 'ALL') return true;
+      return p.pos === pos;
+    });
+
+    // Enrich with our PLAYER_DB projections where available
+    const enriched = yahooAvail.map(yp => {
+      const dbMatch = PLAYER_DB.find(d => d.name.toLowerCase() === yp.name.toLowerCase() || yp.name.toLowerCase().includes(d.name.toLowerCase().split(' ').pop()));
+      return dbMatch ? {...dbMatch, ...yp, proj: dbMatch.proj, own: dbMatch.own, bye: dbMatch.bye, trend: dbMatch.trend, fromYahoo: true}
+                     : {...yp, proj: null, own: null, bye: '—', trend: 0, fromYahoo: true};
+    }).sort((a,b) => (b.proj||0) - (a.proj||0)).slice(0,30);
+
+    if(enriched.length === 0) {
+      el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-3)">No Yahoo free agents found at this position. <button class="link-btn" onclick="showTab('yahoo')">Re-import from Yahoo →</button></div>`;
+      return;
+    }
+
+    const sourceBadge = `<div style="padding:8px 12px;background:var(--start-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--start);font-weight:600;display:flex;align-items:center;gap:6px">✅ Showing ${enriched.length} actual free agents from your Yahoo league <button class="link-btn" style="color:var(--primary);margin-left:auto;font-size:11px" onclick="showTab('yahoo')">Update →</button></div>`;
+    el.innerHTML = sourceBadge + enriched.map((p,i) => {
+      const trendStr = (p.trend||0) > 0 ? `<span class="waiver-trend">▲ ${p.trend}</span>` : (p.trend||0) < 0 ? `<span class="waiver-trend down">▼ ${Math.abs(p.trend)}</span>` : `<span class="waiver-trend" style="color:var(--text-3)">—</span>`;
+      return `<div class="waiver-row">
+        <span class="waiver-rank">${i+1}</span>
+        <span style="display:flex;align-items:center;gap:8px;min-width:0">
+          ${teamLogo(p.team,20)}
+          <span>
+            <div class="player-name" style="font-size:14px">${(p.trend||0) > 0 ? '🔥 ' : ''}${p.name}</div>
+            <div style="display:flex;gap:4px;align-items:center;margin-top:1px">${p.pos ? posChip(p.pos) : ''}<span style="font-size:11px;color:var(--text-3)">${p.bye !== '—' ? 'BYE '+p.bye : ''}</span></div>
+          </span>
+        </span>
+        <span class="waiver-pts">${p.proj != null ? p.proj.toFixed(1) : '—'}</span>
+        <span class="waiver-own">${p.own != null ? p.own+'%' : '—'}</span>
+        ${trendStr}
+        <span style="text-align:center"><button class="add-btn" onclick="markAsOwned('${p.name.replace(/'/g,"\\'")}')">+ Add</button></span>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Fallback: use PLAYER_DB (not Yahoo-specific, but still useful)
+  const players = PLAYER_DB.filter(p => {
+    if(ownedNames.has(p.name.toLowerCase())) return false;
+    if(pos === 'ALL') return true;
+    return p.pos === pos;
+  }).sort((a,b) => b.proj - a.proj).slice(0,20);
+
+  const infoBar = `<div style="padding:8px 12px;background:var(--flex-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--flex-c);font-weight:600">⚠️ Showing general rankings — <button class="link-btn" style="color:var(--primary)" onclick="showTab('yahoo')">connect Yahoo for your actual free agents</button></div>`;
+  if(players.length === 0) { el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-3)">No available players at this position.</div>`; return; }
+  el.innerHTML = infoBar + players.map((p,i) => {
+    const trendStr = p.trend > 0 ? `<span class="waiver-trend">▲ ${p.trend}</span>` : p.trend < 0 ? `<span class="waiver-trend down">▼ ${Math.abs(p.trend)}</span>` : `<span class="waiver-trend" style="color:var(--text-3)">—</span>`;
+    return `<div class="waiver-row">
+      <span class="waiver-rank">${i+1}</span>
+      <span style="display:flex;align-items:center;gap:8px;min-width:0">
+        ${teamLogo(p.team,20)}
+        <span>
+          <div class="player-name" style="font-size:14px">${p.trend > 0 ? '🔥 ' : ''}${p.name}</div>
+          <div style="display:flex;gap:4px;align-items:center;margin-top:1px">${posChip(p.pos)}<span style="font-size:11px;color:var(--text-3)">BYE ${p.bye}</span></div>
+        </span>
+      </span>
+      <span class="waiver-pts">${p.proj.toFixed(1)}</span>
+      <span class="waiver-own">${p.own}%</span>
+      ${trendStr}
+      <span style="text-align:center"><button class="add-btn" onclick="markAsOwned('${p.name.replace(/'/g,"\\'")}')">+ Add</button></span>
+    </div>`;
+  }).join('');
+}
+
+function getOwnedNames() {
+  const names = new Set();
+  if(!state.roster) return names;
+  const {starters={},bench=[]} = state.roster;
+  Object.values(starters).forEach(p => p?.name && names.add(p.name.toLowerCase()));
+  bench.forEach(p => p?.name && names.add(p.name.toLowerCase()));
+  return names;
+}
+
+function markAsOwned(name) {
+  // Provide feedback
+  event.target.textContent = '✓ Added';
+  event.target.style.background = 'var(--start-bg)';
+  event.target.style.color = 'var(--start)';
+  event.target.disabled = true;
+  setTimeout(() => renderWaiver(state.waiverPos), 1500);
+}
+
+// ═══════════════════════════════════
+// NEWS
+// ═══════════════════════════════════
+function renderNews(filter='all') {
+  state.newsFilter = filter;
+  const feed = document.getElementById('newsFeed');
+  if(state.news.length === 0) { feed.innerHTML = `<div class="loading-row"><div class="spinner"></div> Loading...</div>`; return; }
+
+  const ownedNames = getOwnedNames();
+  let articles = state.news;
+
+  if(filter === 'injuries') {
+    articles = articles.filter(a => {
+      const txt = (a.headline + a.description + a.keywords.join(' ')).toLowerCase();
+      return txt.includes('injur') || txt.includes('questionable') || txt.includes('doubtful') || txt.includes(' out ') || txt.includes('ir') || txt.includes('suspend');
+    });
+  } else if(filter === 'myteam') {
+    articles = articles.filter(a => {
+      const txt = (a.headline + a.description).toLowerCase();
+      return Array.from(ownedNames).some(n => txt.includes(n.split(' ').pop()));
+    });
+    if(articles.length === 0) articles = state.news.slice(0,5);
+  }
+
+  if(articles.length === 0) { feed.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-3)">No matching news. Try a different filter.</div>`; return; }
+
+  feed.innerHTML = `<div style="padding:0 16px">${articles.slice(0,12).map(a => {
+    const injuryMatch = (a.headline+a.description).match(/questionable|doubtful|out |injured|i\.r\.|ir |suspend/i);
+    const tag = injuryMatch ? `<span class="news-tag">Injury</span>` : '';
+    return `<div class="news-item" onclick="window.open('${a.link}','_blank')">
+      ${tag}
+      <div class="news-head">${a.headline}</div>
+      ${a.description ? `<div class="news-desc">${a.description}</div>` : ''}
+      <div class="news-meta"><span>${timeAgo(a.published)}</span><span class="news-bullet"></span><span>ESPN</span></div>
+    </div>`;
+  }).join('')}</div>`;
+
+  renderInjuryReport();
+  renderQuickHits();
+}
+
+function renderInjuryReport() {
+  const el = document.getElementById('injuryReport');
+  const injuryNews = state.news.filter(a => {
+    const txt = (a.headline+a.description).toLowerCase();
+    return txt.includes('injur') || txt.includes('questionable') || txt.includes('doubtful') || txt.includes(' out ');
+  }).slice(0,6);
+  if(injuryNews.length === 0) { el.innerHTML = `<p style="color:var(--text-3);font-size:13px">No major injuries reported.</p>`; return; }
+  el.innerHTML = injuryNews.map(a => {
+    const status = /doubtful|out /i.test(a.headline) ? 'badge-out' : 'badge-q';
+    const statusLabel = /doubtful|out /i.test(a.headline) ? 'OUT/DBTFL' : 'QUEST.';
+    return `<div class="news-item">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span class="badge ${status}" style="margin-top:1px;flex-shrink:0">${statusLabel}</span>
+        <div>
+          <div class="news-head">${a.headline}</div>
+          <div class="news-meta">${timeAgo(a.published)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderQuickHits() {
+  const el = document.getElementById('quickHits');
+  const ownedNames = getOwnedNames();
+  const myNews = state.news.filter(a => {
+    const txt = (a.headline+a.description).toLowerCase();
+    return Array.from(ownedNames).some(n => n.length > 3 && txt.includes(n.split(' ').pop()));
+  }).slice(0,4);
+  const recent = state.news.slice(0,4);
+  const items = myNews.length > 0 ? myNews : recent;
+  el.innerHTML = items.map(a => `<div class="news-item">
+    <div class="news-head">${a.headline}</div>
+    <div class="news-meta">${timeAgo(a.published)}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════
+// TRADES
+// ═══════════════════════════════════
+function renderTrades() {
+  document.getElementById('sellHighList').innerHTML = SELL_HIGH.map(p => `
+    <div class="trade-suggestion" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        ${teamLogo(p.team,20)} ${posChip(p.pos)}
+        <strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px">${p.name}</strong>
+        <span class="trade-tag trade-sell">SELL HIGH</span>
+      </div>
+      <div class="trade-reasoning">${p.reason}</div>
+    </div>`).join('');
+
+  document.getElementById('buyLowList').innerHTML = BUY_LOW.map(p => `
+    <div class="trade-suggestion" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        ${teamLogo(p.team,20)} ${posChip(p.pos)}
+        <strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px">${p.name}</strong>
+        <span class="trade-tag trade-buy">BUY LOW</span>
+      </div>
+      <div class="trade-reasoning">${p.reason}</div>
+    </div>`).join('');
+
+  document.getElementById('tradesList').innerHTML = TRADE_SUGGESTIONS.map(t => `
+    <div class="trade-suggestion">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span class="trade-tag trade-${t.type}">${t.label}</span>
+      </div>
+      <div class="trade-row">
+        <div class="trade-side">
+          <div class="trade-label">You Give</div>
+          ${t.give.map(n => `<div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700">${n}</div>`).join('')}
+        </div>
+        <div class="trade-arrow">⇄</div>
+        <div class="trade-side">
+          <div class="trade-label">You Get</div>
+          ${t.get.map(n => `<div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700">${n}</div>`).join('')}
+        </div>
+      </div>
+      <div class="trade-reasoning">${t.reasoning}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════
+// SCHEDULE / SCOREBOARD
+// ═══════════════════════════════════
+function renderScoreboard(data) {
+  const el = document.getElementById('scoreboardGrid');
+  if(!data?.events?.length) { el.innerHTML = `<p style="color:var(--text-3);font-size:13px">No games found. Try refreshing.</p>`; return; }
+  const week = data.week?.number;
+  if(week) document.getElementById('weekBadge').textContent = `NFL Week ${week}`;
+  el.innerHTML = data.events.slice(0,16).map(ev => {
+    const comps = ev.competitions?.[0];
+    const home = comps?.competitors?.find(c=>c.homeAway==='home');
+    const away = comps?.competitors?.find(c=>c.homeAway==='away');
+    if(!home||!away) return '';
+    const status = comps.status?.type?.name || '';
+    const isLive = status === 'STATUS_IN_PROGRESS';
+    const isFinal = status === 'STATUS_FINAL';
+    const time = comps.status?.type?.shortDetail || ev.date?.substring(0,10) || '';
+    const statusClass = isLive ? 'status-live' : isFinal ? 'status-final' : 'status-pre';
+    const statusLabel = isLive ? '● LIVE' : isFinal ? 'Final' : time;
+    return `<div class="game-card">
+      <div class="game-teams">
+        <div style="text-align:right;flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px">${away.team?.abbreviation||''}</span>
+            <img src="https://a.espncdn.com/i/teamlogos/nfl/500/${away.team?.abbreviation||''}.png" width="28" height="28" style="object-fit:contain" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="game-score">${away.score||'—'}&ndash;${home.score||'—'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <img src="https://a.espncdn.com/i/teamlogos/nfl/500/${home.team?.abbreviation||''}.png" width="28" height="28" style="object-fit:contain" onerror="this.style.display='none'">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px">${home.team?.abbreviation||''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="game-status ${statusClass}">${statusLabel}</div>
+    </div>`;
+  }).join('');
+
+  renderByeWeeks();
+  renderPlayoffSchedule();
+}
+
+function renderByeWeeks() {
+  const el = document.getElementById('byeWeeks');
+  const byeMap = {};
+  PLAYER_DB.forEach(p => { if(!byeMap[p.bye]) byeMap[p.bye] = []; byeMap[p.bye].push(p); });
+  el.innerHTML = Object.keys(byeMap).sort((a,b)=>+a-+b).map(wk => `
+    <div class="stat-row">
+      <span style="font-weight:600">Week ${wk}</span>
+      <span style="font-size:12px;color:var(--text-2);text-align:right">
+        ${[...new Set(byeMap[wk].map(p=>p.team))].map(t=>teamLogo(t,18)).join('')}
+      </span>
+    </div>`).join('');
+}
+
+function renderPlayoffSchedule() {
+  const el = document.getElementById('playoffSchedule');
+  // Highlight teams with good Wk 14-17 schedules
+  const goodTeams = [
+    {team:'KC', reason:'Weak home schedule in Wks 15-16'},
+    {team:'PHI', reason:'Three home games in fantasy playoffs'},
+    {team:'DET', reason:'Favorable defensive matchups'},
+    {team:'BUF', reason:'NFC opponents in playoff weeks'},
+  ];
+  el.innerHTML = goodTeams.map(t => `
+    <div class="schedule-row">
+      ${teamLogo(t.team, 24)}
+      <div>
+        <div style="font-weight:600;font-size:13px">${NFL_TEAMS[t.team]?.name || t.team}</div>
+        <div style="font-size:11px;color:var(--start)">${t.reason}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════
+// WEEKLY TRENDS
+// ═══════════════════════════════════
+function renderTrends() {
+  const el = document.getElementById('weeklyTrends');
+  const trending = PLAYER_DB.filter(p=>p.trend>1).slice(0,5);
+  el.innerHTML = trending.map(p => {
+    const weeks = [p.proj*.7, p.proj*.85, p.proj*.9, p.proj*.95, p.proj, p.proj*1.05, p.proj*1.1].map(v=>Math.round(v));
+    return `<div class="player-row">
+      ${teamLogo(p.team,22)}
+      <div class="player-info">
+        <div class="player-name">${p.name}</div>
+        <div class="player-meta">${posChip(p.pos)} <span style="color:var(--start);font-weight:600">▲ Trending up</span></div>
+        ${sparkHTML(weeks)}
+      </div>
+      <div class="proj-block">
+        <div class="proj-num">${p.proj.toFixed(1)}</div>
+        <div class="proj-lbl">proj/wk</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+
+
+// ═══════════════════════════════════
+// YAHOO OAUTH + API
+// ═══════════════════════════════════
+
+// ── Config — set your Netlify site URL here or via prompt ──
+function getProxy() {
+  let p = localStorage.getItem('ffcc_proxy') || '';
+  return p.replace(/\/$/, '');
+}
+function setProxy(url) {
+  localStorage.setItem('ffcc_proxy', url.replace(/\/$/, ''));
+}
+
+const LEAGUE_ID = '248304';
+const TEAM_NUM  = '3';
+const LEAGUE_KEY = `nfl.l.${LEAGUE_ID}`;
+const TEAM_KEY   = `${LEAGUE_KEY}.t.${TEAM_NUM}`;
+
+// ── Token helpers ──
+function getYahooToken() {
+  try { return JSON.parse(localStorage.getItem('ffcc_yahoo') || 'null'); } catch { return null; }
+}
+function setYahooToken(data) {
+  try { localStorage.setItem('ffcc_yahoo', JSON.stringify(data)); } catch {}
+}
+function clearYahooToken() {
+  try { localStorage.removeItem('ffcc_yahoo'); } catch {}
+}
+function isConnected() {
+  const t = getYahooToken();
+  return !!(t && t.access_token);
+}
+
+// ── Capture token from URL hash after OAuth redirect ──
+function handleOAuthCallback() {
+  const hash = location.hash.slice(1);
+  if (!hash.includes('yahoo_token')) return;
+  const params = new URLSearchParams(hash);
+  const access  = params.get('yahoo_token');
+  const refresh = params.get('yahoo_refresh');
+  const expires = parseInt(params.get('yahoo_expires') || '0');
+  if (access) {
+    setYahooToken({ access_token: access, refresh_token: refresh, expires_at: expires });
+    history.replaceState(null, '', location.pathname + location.search);
+    showToast('✅ Yahoo connected! Syncing your roster…');
+    fetchYahooData();
+  }
+}
+
+// ── Refresh access token when it nears expiry ──
+async function ensureFreshToken() {
+  const t = getYahooToken();
+  if (!t) return null;
+  if (t.expires_at && Date.now() < t.expires_at - 60000) return t.access_token;
+  const proxy = getProxy();
+  if (!proxy) return null;
+  try {
+    const res = await fetch(`${proxy}/api/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: t.refresh_token }),
+    });
+    if (!res.ok) { clearYahooToken(); updateAuthUI(); return null; }
+    const data = await res.json();
+    setYahooToken(data);
+    return data.access_token;
+  } catch { return null; }
+}
+
+// ── Core proxy fetch ──
+async function yahooFetch(path) {
+  const proxy = getProxy();
+  if (!proxy) return null;
+  const token = await ensureFreshToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(`${proxy}/api/yahoo?path=${encodeURIComponent(path)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+// ── Parse Yahoo's deeply nested player array ──
+function parseYahooPlayer(playerArr) {
+  if (!Array.isArray(playerArr) || playerArr.length < 1) return null;
+  const infoArr = Array.isArray(playerArr[0]) ? playerArr[0] : [];
+  const statusObj = playerArr[1] || {};
+
+  const get = (key) => {
+    for (const item of infoArr) {
+      if (item && typeof item === 'object' && !Array.isArray(item) && item[key] !== undefined) return item[key];
+    }
+    return null;
+  };
+
+  const nameObj  = get('name') || {};
+  const headshot = get('headshot') || {};
+  const eligible = get('eligible_positions') || [];
+  const rawPos   = get('display_position') || (Array.isArray(eligible) ? eligible[0]?.position : '') || '';
+  const teamAbbr = (get('editorial_team_abbr') || '').toUpperCase();
+  const byeWeeks = get('bye_weeks') || {};
+  const pctOwned = get('percent_owned') || {};
+
+  // Selected position (starter vs bench) comes from the second element
+  const selPos = statusObj?.selected_position?.[1]?.position || '';
+
+  return {
+    name:        nameObj.full || `${nameObj.first || ''} ${nameObj.last || ''}`.trim() || 'Unknown',
+    pos:         rawPos.replace('/', '').split(',')[0].trim(),
+    team:        teamAbbr,
+    selectedPos: selPos,
+    injStatus:   get('status') || '',
+    bye:         byeWeeks.week,
+    own:         parseFloat(pctOwned.value) || 0,
+  };
+}
+
+// ── API calls ──
+async function fetchYahooRoster() {
+  const data = await yahooFetch(`team/${TEAM_KEY}/roster/players`);
+  if (!data) return null;
+  try {
+    const roster = data.fantasy_content.team[1].roster;
+    const players = roster.players;
+    const count = parseInt(players.count);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const p = parseYahooPlayer(players[i]?.player);
+      if (p) result.push(p);
+    }
+    return result;
+  } catch(e) { console.warn('Roster parse error', e); return null; }
+}
+
+async function fetchYahooFreeAgents(pos) {
+  const posFilter = pos && pos !== 'ALL' ? `;position=${pos}` : '';
+  const data = await yahooFetch(`league/${LEAGUE_KEY}/players;status=FA;sort=AR;count=30${posFilter}`);
+  if (!data) return [];
+  try {
+    const players = data.fantasy_content.league[1].players;
+    const count = parseInt(players.count);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const p = parseYahooPlayer(players[i]?.player);
+      if (p) result.push(p);
+    }
+    return result;
+  } catch(e) { console.warn('Free agent parse error', e); return []; }
+}
+
+async function fetchYahooMatchup() {
+  const data = await yahooFetch(`team/${TEAM_KEY}/matchups`);
+  if (!data) return null;
+  try {
+    const matchups = data.fantasy_content.team[1].matchups;
+    const keys = Object.keys(matchups).filter(k => k !== 'count');
+    const week = keys[keys.length - 1];
+    const matchup = matchups[week]?.matchup;
+    if (!matchup) return null;
+    const teams = matchup[0].teams;
+    const count = parseInt(teams.count);
+    for (let i = 0; i < count; i++) {
+      const t = teams[i]?.team;
+      if (!t) continue;
+      const tArr = t[0];
+      const tKey = Array.isArray(tArr) ? tArr.find(x => x?.team_key)?.team_key : null;
+      if (tKey && tKey !== TEAM_KEY) {
+        const tName = Array.isArray(tArr) ? tArr.find(x => x?.name)?.name : null;
+        const pts   = t[1]?.team_points?.total;
+        return { name: tName || 'Opponent', points: pts, week: matchup['0']?.week };
+      }
+    }
+    return null;
+  } catch(e) { console.warn('Matchup parse error', e); return null; }
+}
+
+async function fetchYahooStandings() {
+  const data = await yahooFetch(`league/${LEAGUE_KEY}/standings`);
+  if (!data) return [];
+  try {
+    const teams = data.fantasy_content.league[1].standings[0].teams;
+    const count = parseInt(teams.count);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const t = teams[i]?.team;
+      if (!t) continue;
+      const infoArr = t[0];
+      const stats   = t[2];
+      const name = Array.isArray(infoArr) ? infoArr.find(x => x?.name)?.name : null;
+      const totals = stats?.team_standings?.outcome_totals || {};
+      if (name) result.push({ team: name, record: `${totals.wins || 0}-${totals.losses || 0}` });
+    }
+    return result;
+  } catch(e) { console.warn('Standings parse error', e); return []; }
+}
+
+// ── Fetch all Yahoo data and update state ──
+async function fetchYahooData() {
+  if (!isConnected()) return;
+
+  const [roster, freeAgents, matchup, standings] = await Promise.all([
+    fetchYahooRoster(),
+    fetchYahooFreeAgents(state.waiverPos),
+    fetchYahooMatchup(),
+    fetchYahooStandings(),
+  ]);
+
+  if (roster) {
+    // Build our starters/bench structure from Yahoo roster
+    const starters = {};
+    const bench    = [];
+    const usedSlots = {};
+    roster.forEach(p => {
+      const sp = p.selectedPos;
+      if (sp === 'BN' || sp === 'IR' || !sp) {
+        bench.push({ name: p.name, pos: p.pos, team: p.team });
+        return;
+      }
+      const slotKey = mapYahooPosToSlot(sp, usedSlots);
+      usedSlots[slotKey] = true;
+      starters[slotKey] = { name: p.name, pos: p.pos, team: p.team };
+    });
+    state.roster = { starters, bench };
+    renderLineup();
+    renderStartSit();
+    // Update team name from Yahoo if available
+    const insRow = document.getElementById('insightsRow');
+    if (insRow) insRow.innerHTML = `<div class="insight good">✅ Yahoo roster synced — ${Object.keys(starters).length} starters, ${bench.length} bench</div>`;
+  }
+
+  if (freeAgents.length) {
+    state.importedFreeAgents = freeAgents;
+    renderWaiver(state.waiverPos);
+  }
+
+  if (matchup) {
+    state.importedOpponent = matchup;
+    // Show opponent chip in header if available
+    const badge = document.getElementById('weekBadge');
+    if (badge && matchup.week) badge.textContent = `NFL Week ${matchup.week} • vs ${matchup.name}`;
+  }
+
+  if (standings.length) state.importedStandings = standings;
+
+  saveState();
+  document.getElementById('lastUpdated').textContent = 'Yahoo synced ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function mapYahooPosToSlot(yahooPos, used) {
+  const p = yahooPos.toUpperCase();
+  if (p === 'QB')              return 'QB';
+  if (p === 'TE')              return 'TE';
+  if (p === 'K')               return 'K';
+  if (p === 'DEF' || p === 'D/ST') return 'DEF';
+  if (p === 'W/R/T' || p === 'FLEX' || p === 'W/R' || p === 'R/W/T') return 'FLEX';
+  if (p === 'RB') { if (!used.RB1) return 'RB1'; if (!used.RB2) return 'RB2'; return 'FLEX'; }
+  if (p === 'WR') { if (!used.WR1) return 'WR1'; if (!used.WR2) return 'WR2'; if (!used.WR3) return 'WR3'; return 'FLEX'; }
+  return p;
+}
+
+// ── Auth UI ──
+function showProxyModal() {
+  const existing = document.getElementById('proxyModal');
+  if (existing) { existing.remove(); }
+  const proxy = getProxy() || '';
+  const modal = document.createElement('div');
+  modal.id = 'proxyModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border-radius:var(--r-lg);padding:28px 24px;width:min(420px,92vw);box-shadow:var(--shadow-md)">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">Connect Yahoo Fantasy</div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Enter your Netlify proxy URL. This is the Netlify site that hosts the auth functions.</p>
+      <input id="proxyInput" type="url" placeholder="https://your-site.netlify.app"
+        value="${proxy}"
+        style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;background:var(--bg);color:var(--text);margin-bottom:16px">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="document.getElementById('proxyModal').remove()" style="padding:8px 16px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;color:var(--text);cursor:pointer;font-size:13px">Cancel</button>
+        <button onclick="doConnect()" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer">Connect →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  const inp = document.getElementById('proxyInput');
+  inp.focus();
+  inp.select();
+}
+
+function doConnect() {
+  const inp = document.getElementById('proxyInput');
+  const proxy = (inp ? inp.value : '').trim().replace(/\/$/, '');
+  if (!proxy) return;
+  setProxy(proxy);
+  const modal = document.getElementById('proxyModal');
+  if (modal) modal.remove();
+  // Form submit — never blocked by sandbox or popup blockers
+  const form = document.createElement('form');
+  form.method = 'GET';
+  form.action = `${proxy}/api/auth`;
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function connectYahoo() {
+  // Always show modal so user can confirm/edit the proxy URL
+  showProxyModal();
+}
+
+function disconnectYahoo() {
+  const confirmed = window.confirm ? window.confirm('Disconnect Yahoo Fantasy?') : true;
+  if (!confirmed) return;
+  clearYahooToken();
+  state.importedFreeAgents = [];
+  state.importedOpponent   = null;
+  state.importedStandings  = [];
+  state.roster = null;
+  saveState();
+  updateAuthUI();
+  renderLineup();
+  renderWaiver(state.waiverPos);
+  const insRow = document.getElementById('insightsRow');
+  if (insRow) insRow.innerHTML = `<div class="insight neutral">🔗 Connect Yahoo Fantasy to sync your real roster and unlock personalized advice</div>`;
+}
+
+function updateAuthUI() {
+  const btn = document.getElementById('yahooAuthBtn');
+  if (!btn) return;
+  if (isConnected()) {
+    btn.textContent = '✅ Yahoo Connected';
+    btn.style.cssText += ';background:var(--start-bg)!important;color:var(--start)!important;border:1px solid var(--start)';
+    btn.onclick = disconnectYahoo;
+  } else {
+    btn.textContent = '🔗 Connect Yahoo';
+    btn.style.cssText += ';background:var(--primary)!important;color:#fff!important;border:none';
+    btn.onclick = connectYahoo;
+  }
+}
+
+// ── Toast ──
+function showToast(msg, color) {
+  const t = document.createElement('div');
+  const bg = color || 'var(--start)';
+  t.style.cssText = `position:fixed;bottom:20px;right:20px;background:${bg};color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:opacity .4s`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+// ═══════════════════════════════════
+// LOAD ALL DATA
+// ═══════════════════════════════════
+async function refreshAll() {
+  if(state.loading) return;
+  state.loading = true;
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+
+  try {
+    const tasks = [fetchNews(), fetchScoreboard()];
+    if(isConnected()) tasks.push(fetchYahooData());
+    const [newsResult, sbResult] = await Promise.allSettled(tasks);
+    if(newsResult.status === 'fulfilled') {
+      state.news = newsResult.value;
+      renderNews(state.newsFilter);
+    }
+    if(sbResult.status === 'fulfilled') {
+      state.scoreboard = sbResult.value;
+      renderScoreboard(sbResult.value);
+    }
+    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    console.warn('API error:', e);
+  } finally {
+    state.loading = false;
+    btn.classList.remove('spinning');
+  }
+}
+
+// ═══════════════════════════════════
+// TABS
+// ═══════════════════════════════════
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-'+name));
+}
+
+// ═══════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
+
+document.querySelectorAll('#waiverSubTabs .sub-tab').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('#waiverSubTabs .sub-tab').forEach(b => b.classList.toggle('active', b === btn));
+  renderWaiver(btn.dataset.pos);
+}));
+
+document.querySelectorAll('#newsSubTabs .sub-tab').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('#newsSubTabs .sub-tab').forEach(b => b.classList.toggle('active', b === btn));
+  renderNews(btn.dataset.filter);
+}));
+
+document.getElementById('teamNameBtn').addEventListener('click', () => {
+  const name = prompt('Team name:', state.teamName || 'My Team');
+  if (name !== null) {
+    state.teamName = name.trim() || 'My Team';
+    document.getElementById('teamNameBtn').textContent = state.teamName;
+    saveState();
+  }
+});
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+loadState();
+document.getElementById('teamNameBtn').textContent = state.teamName || 'My Team';
+handleOAuthCallback(); // capture token if returning from Yahoo OAuth
+updateAuthUI();
+renderLineup();
+renderWaiver('ALL');
+renderTrades();
+renderTrends();
+refreshAll();
+</script>
