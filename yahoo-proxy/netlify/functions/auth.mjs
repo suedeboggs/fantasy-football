@@ -12,6 +12,7 @@ export default async (req) => {
     redirect_uri:  redirectUri,
     response_type: 'code',
     language:      'en-us',
+    scope:         'fspt-r fspt-w',
   });
 
   const yahooAuthUrl = `https://api.login.yahoo.com/oauth2/request_auth?${params}`;
