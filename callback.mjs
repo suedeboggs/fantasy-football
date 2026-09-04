@@ -8,11 +8,13 @@ export default async (req) => {
   const clientSecret = process.env.YAHOO_CLIENT_SECRET;
   const redirectUri  = process.env.YAHOO_REDIRECT_URI;
   const dashboardUrl = process.env.DASHBOARD_URL; // your artifact / hosted dashboard URL
-
+ 
   if (!code) {
-    return new Response('Missing OAuth code', { status: 400 });
+    const error = url.searchParams.get('error');
+    const desc  = url.searchParams.get('error_description');
+    return new Response(`OAuth failed: ${error || 'no code'} — ${desc || url.search}`, { status: 400 });
   }
-
+ 
   // Exchange authorization code for tokens
   const basic = btoa(`${clientId}:${clientSecret}`);
   const tokenRes = await fetch('https://api.login.yahoo.com/oauth2/get_token', {
@@ -27,14 +29,14 @@ export default async (req) => {
       redirect_uri: redirectUri,
     }),
   });
-
+ 
   if (!tokenRes.ok) {
     const err = await tokenRes.text();
     return new Response(`Token exchange failed: ${err}`, { status: 502 });
   }
-
+ 
   const tokens = await tokenRes.json();
-
+ 
   // Send tokens to the dashboard in the hash fragment.
   // Hash never reaches any server — stays 100% client-side.
   const expiresAt = Date.now() + tokens.expires_in * 1000;
@@ -43,8 +45,8 @@ export default async (req) => {
     yahoo_refresh: tokens.refresh_token,
     yahoo_expires: expiresAt,
   });
-
+ 
   return Response.redirect(`${dashboardUrl}#${hash}`, 302);
 };
-
+ 
 export const config = { path: '/api/callback' };
