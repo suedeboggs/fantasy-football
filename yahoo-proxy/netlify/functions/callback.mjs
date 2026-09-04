@@ -29,27 +29,3 @@ export default async (req) => {
       redirect_uri: redirectUri,
     }),
   });
- 
-  if (!tokenRes.ok) {
-    const err = await tokenRes.text();
-    return new Response(`Token exchange failed: ${err}`, { status: 502 });
-  }
- 
-  const tokens = await tokenRes.json();
- 
-  // Send tokens to the dashboard in the hash fragment.
-  // Hash never reaches any server — stays 100% client-side.
-  const expiresAt = Date.now() + tokens.expires_in * 1000;
-  const hash = new URLSearchParams({
-    yahoo_token:   tokens.access_token,
-    yahoo_refresh: tokens.refresh_token,
-    yahoo_expires: expiresAt,
-  });
- 
-  return Response.redirect(`${dashboardUrl}#${hash}`, 302);
-};
- 
-export const config = { path: '/api/callback' };Url}#${hash}`, 302);
-};
-
-export const config = { path: '/api/callback' };
