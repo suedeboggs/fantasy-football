@@ -1139,7 +1139,13 @@ function renderTrends() {
 // ── Config — set your Netlify site URL here or via prompt ──
 function getProxy() {
   let p = localStorage.getItem('ffcc_proxy') || '';
-  return p.replace(/\/$/, '');
+  p = p.replace(/\/$/, '');
+  // If no proxy stored, use the current site's origin (works when dashboard is hosted on Netlify)
+  if (!p && window.location.hostname !== 'claude.ai') {
+    p = window.location.origin;
+    localStorage.setItem('ffcc_proxy', p);
+  }
+  return p;
 }
 function setProxy(url) {
   localStorage.setItem('ffcc_proxy', url.replace(/\/$/, ''));
