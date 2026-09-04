@@ -1210,16 +1210,23 @@ async function ensureFreshToken() {
 // ── Core proxy fetch ──
 async function yahooFetch(path) {
   const proxy = getProxy();
-  if (!proxy) return null;
+  if (!proxy) { showToast('❌ No proxy URL set', 'var(--sit)'); return null; }
   const token = await ensureFreshToken();
-  if (!token) return null;
+  if (!token) { showToast('❌ Token missing — reconnect Yahoo', 'var(--sit)'); return null; }
   try {
     const res = await fetch(`${proxy}/api/yahoo?path=${encodeURIComponent(path)}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const txt = await res.text().catch(() => res.status);
+      showToast(`❌ Yahoo API error ${res.status}: ${String(txt).slice(0,80)}`, 'var(--sit)');
+      return null;
+    }
     return res.json();
-  } catch { return null; }
+  } catch(e) {
+    showToast(`❌ Fetch failed: ${e.message}`, 'var(--sit)');
+    return null;
+  }
 }
 
 // ── Parse Yahoo's deeply nested player array ──
